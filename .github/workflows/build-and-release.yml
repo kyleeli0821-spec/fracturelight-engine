@@ -17,8 +17,11 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Install dependencies
-        run: npm install
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: install dependencies
+        run: npm ci || npm install
 
       - name: Build web playable
         run: |
@@ -30,10 +33,21 @@ jobs:
             mkdir -p build_web
             echo "<!-- placeholder build -->" > build_web/index.html
           fi
+      - name: Show build output
+        run: |
+         echo "===build_web contents ==="
+         ls -la build_web || true
+      
 
       - name: Archive build_web
         run: |
+          if [ -d build_web]; then
           tar -czf build_web.tar.gz -C build_web .
+          ls -lh build_web.tar.gz
+        else
+           echo "no build_web directory found; skipping archive"
+           exit 1
+         fi
 
       - name: Create release
         id: create_release
@@ -50,3 +64,5 @@ jobs:
           files: build_web.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      -name: Debug list repo root
+       run: ls -la

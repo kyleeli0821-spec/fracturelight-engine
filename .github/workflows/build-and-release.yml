@@ -20,41 +20,41 @@ jobs:
       - name: Install jq
         run: sudo apt-get update && sudo apt-get install -y jq
 
-      - name: install dependencies
+      - name: Install dependencies
         run: npm ci || npm install
 
       - name: Build web playable
         run: |
           # Replace this with your real build command that outputs to build_web/
-          # Example: npm run build:web
+          # Example: npm run build
           if [ -d build_web ]; then
             echo "build_web already exists"
           else
             mkdir -p build_web
             echo "<!-- placeholder build -->" > build_web/index.html
           fi
+
       - name: Show build output
         run: |
-         echo "===build_web contents ==="
-         ls -la build_web || true
-      
+          echo "=== build_web contents ==="
+          ls -la build_web || true
 
       - name: Archive build_web
         run: |
-          if [ -d build_web]; then
-          tar -czf build_web.tar.gz -C build_web .
-          ls -lh build_web.tar.gz
-        else
-           echo "no build_web directory found; skipping archive"
-           exit 1
-         fi
+          if [ -d build_web ]; then
+            tar -czf build_web.tar.gz -C build_web .
+            ls -lh build_web.tar.gz
+          else
+            echo "No build_web directory found; skipping archive"
+            exit 1
+          fi
 
       - name: Create release
         id: create_release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: "engine-build-$(date -u +'%Y%m%dT%H%M%SZ')"
-          name: "Engine build $(date -u +'%Y-%m-%d %H:%M:%SZ')"
+          tag_name: "engine-build-${{ github.run_id }}"
+          name: "Engine build ${{ github.run_number }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -64,5 +64,6 @@ jobs:
           files: build_web.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      -name: Debug list repo root
-       run: ls -la
+
+      - name: Debug list repo root
+        run: ls -la

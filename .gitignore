@@ -1,0 +1,22 @@
+# Node / build
+node_modules/
+build_web/
+dist/
+*.log
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Secrets
+.env
+.env.local
+*.key
+*.pem
+*.p12
+
+# Git LFS placeholder
+*.psd
+*.zip

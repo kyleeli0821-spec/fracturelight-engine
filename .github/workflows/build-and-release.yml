@@ -1,0 +1,52 @@
+name: Build and Release Web Build
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout engine repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build web playable
+        run: |
+          # Replace this with your real build command that outputs to build_web/
+          # Example: npm run build:web
+          if [ -d build_web ]; then
+            echo "build_web already exists"
+          else
+            mkdir -p build_web
+            echo "<!-- placeholder build -->" > build_web/index.html
+          fi
+
+      - name: Archive build_web
+        run: |
+          tar -czf build_web.tar.gz -C build_web .
+
+      - name: Create release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: "engine-build-$(date -u +'%Y%m%dT%H%M%SZ')"
+          name: "Engine build $(date -u +'%Y-%m-%d %H:%M:%SZ')"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload release asset
+        uses: softprops/action-gh-release@v1
+        with:
+          files: build_web.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
